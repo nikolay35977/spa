@@ -6,18 +6,18 @@ import ContentEditable from 'react-contenteditable'
 const TextForm = (props) => {
 
     const [html, setHtml] = useState('');
-    let contentEditable = React.createRef();
 
 
     const handleChange = e => {
-        setHtml(e.target.value);
-        props.checkText(html);
+        let value = e.target.value;
+        setHtml(value);
+        if (value[value.length - 1] === ' ') {
+            props.checkText(html); //props.text and props.notRightWords will update
+            //use CreateWordsArray to show it
+        }
     };
-/*
-    useEffect(() => {
-        CreateWordsArray(props.notRightWords, props.text);
-    });*/
 
+    // need to change CreateWordsArray func
     const CreateWordsArray = (notRightWords, text) => {
         let WordsArray = [];
         for (let i = 0; i < text.length; i++) {
@@ -32,7 +32,7 @@ const TextForm = (props) => {
         return WordsArray
     }
 
-    return (<ContentEditable ref={contentEditable} className={'divInner'} html={html} onChange={handleChange}/>);
+    return (<ContentEditable className={'divInner'} html={html} onChange={handleChange}/>);
 }
 
 export default TextForm;

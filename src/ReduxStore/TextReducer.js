@@ -5,8 +5,7 @@ const SET_TEXT = 'SET-TEXT',
 
 let initialState = {
     text: '',
-    notRightWords: [],
-    wordsArrayHtml: []
+    notRightWords: []
 };
 
 const TextReducer = (state = initialState, action) => {
@@ -44,40 +43,27 @@ const getWordsFromRequest = (wordsDict) => {
 
 const selectWordsFromForm = (wordsArray, text) => {
     return (dispatch) => {
-        let spacer = "&nbsp;";
-        text = deleteEmptyElements(text.split(spacer));
+        text = text.toLowerCase();
+        let idElement = -1;
         for (let i = 0; i < wordsArray.length; i++) {
-            if (text.indexOf(wordsArray[i]) !== -1) {
-                console.log(text.indexOf(wordsArray[i]));
-                dispatch(setNotRightWords(text.indexOf(wordsArray[i])));
+            idElement = text.indexOf(wordsArray[i]);
+            if (idElement !== -1) {
+                console.log(idElement);
+                dispatch(setNotRightWords(idElement));
             }
         }
     }
 }
 
-const deleteEmptyElements = (oldArray) => {
-    let newArray = [];
-    for (let i = 0; i < oldArray.length; i++) {
-        if (oldArray[i] !== '') {
-            newArray.push(oldArray[i]);
-        }
-    }
-    return newArray;
-}
-
 export const checkText = (value) => {
     return (dispatch) => {
-        let spacer = ";";
-        console.log(value[value.length - 1]);
-        if (value[value.length - 1] === spacer || value[value.length - 1] === ' ') {
-            getCheckWord(value).then(data => {
-                let incorrectWords = getWordsFromRequest(data[0]);
-                if (incorrectWords.length !== 0) {
-                    dispatch(selectWordsFromForm(incorrectWords, value));
-                }
-            });
-            dispatch(setText(value));
-        } else dispatch(setText(value));
+        getCheckWord(value).then(data => {
+            let incorrectWords = getWordsFromRequest(data[0]);
+            if (incorrectWords.length !== 0) {
+                dispatch(selectWordsFromForm(incorrectWords, value));
+            }
+        });
+        dispatch(setText(value));
     }
 }
 
