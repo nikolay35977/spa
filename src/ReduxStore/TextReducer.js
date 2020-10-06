@@ -44,11 +44,11 @@ const getWordsFromRequest = (wordsDict) => {
 const selectWordsFromForm = (wordsArray, text) => {
     return (dispatch) => {
         text = text.toLowerCase();
+        text = text.split(' ');
         let idElement = -1;
         for (let i = 0; i < wordsArray.length; i++) {
             idElement = text.indexOf(wordsArray[i]);
             if (idElement !== -1) {
-                console.log(idElement);
                 dispatch(setNotRightWords(idElement));
             }
         }
@@ -57,6 +57,7 @@ const selectWordsFromForm = (wordsArray, text) => {
 
 export const checkText = (value) => {
     return (dispatch) => {
+        value = value.replace('&nbsp;',' ');
         getCheckWord(value).then(data => {
             let incorrectWords = getWordsFromRequest(data[0]);
             if (incorrectWords.length !== 0) {

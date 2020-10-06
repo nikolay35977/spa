@@ -3,36 +3,48 @@ import './TextForm.css';
 import ContentEditable from 'react-contenteditable'
 
 
-const TextForm = (props) => {
+class TextForm extends React.Component {
 
-    const [html, setHtml] = useState('');
+    constructor(props) {
+        super(props);
+        this.state = {html: '', countSpaces: 0};
+    }
+    
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevState.countSpaces !== this.state.countSpaces) this.setState({html: this.CreateWordsArray(this.props.notRightWords ,this.props.text)});
+    }
 
-
-    const handleChange = e => {
+    handleChange = e => {
         let value = e.target.value;
-        setHtml(value);
-        if (value[value.length - 1] === ' ') {
-            props.checkText(html); //props.text and props.notRightWords will update
+        if (value[value.length - 1].charCodeAt() === 59) {
+            this.setState({countSpaces: e.target.value.split('&nbsp').length});
+            this.props.checkText(value); //props.text and props.notRightWords will update
             //use CreateWordsArray to show it
         }
     };
 
     // need to change CreateWordsArray func
-    const CreateWordsArray = (notRightWords, text) => {
-        let WordsArray = [];
+    CreateWordsArray = (notRightWords, text) => {
+        debugger;
+        text = text.split('&nbsp;');
+        let WordsArray = '';
+        this.setState({html: ''});
         for (let i = 0; i < text.length; i++) {
             if (i === 2) {
-                WordsArray.push(<span><span
-                    className={'textColor'}>{text[i]}</span><span>{"\u00A0"}</span></span>)
+                WordsArray += `<span style="color: red">${text[i] + '&nbsp;'}</span>`
             } else {
-                WordsArray.push(<span><span
-                    className={'textRight'}>{text[i]}</span><span>{"\u00A0"}</span></span>)
+                WordsArray += text[i]+'&nbsp'
             }
         }
+        console.log(WordsArray);
         return WordsArray
     }
 
-    return (<ContentEditable className={'divInner'} html={html} onChange={handleChange}/>);
+    render() {
+
+        return (<ContentEditable className={'divInner'} html={this.state.html} onChange={this.handleChange}/>);
+    }
+
 }
 
 export default TextForm;
