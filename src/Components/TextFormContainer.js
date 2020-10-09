@@ -6,7 +6,7 @@ import TextForm from "./TextForm";
 let mapStateToProps = (state) => {
     return {
         text: state.Text.text,
-        notRightWords: state.Text.notRightWords
+        html: state.Text.html
     }
 }
 

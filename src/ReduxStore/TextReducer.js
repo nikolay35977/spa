@@ -1,36 +1,24 @@
 ﻿import {getCheckWord} from '../Api/Api';
 
-const SET_TEXT = 'SET-TEXT',
-    SET_NOT_RIGHT_WORDS = 'SET-NOT-RIGHT-WORDS';
+const SET_WORDS_ARRAY = 'SET-WORDS-ARRAY';
 
 let initialState = {
-    text: '',
-    notRightWords: []
+    html: ''
 };
 
 const TextReducer = (state = initialState, action) => {
     switch (action.type) {
-        case SET_TEXT:
-            return {...state, text: action.text}
-        case SET_NOT_RIGHT_WORDS:
-            let newNotRightWords = state.notRightWords;
-            if (!newNotRightWords.includes(action.newId)) newNotRightWords.push(action.newId);
-            return {...state, notRightWords: newNotRightWords}
+        case SET_WORDS_ARRAY:
+            return {...state, html: action.html}
         default:
             return state
     }
 }
 
-const setText = (text) =>
+const setWordsArray = (html) =>
     ({
-        type: SET_TEXT,
-        text
-    })
-
-const setNotRightWords = (newId) =>
-    ({
-        type: SET_NOT_RIGHT_WORDS,
-        newId
+        type: SET_WORDS_ARRAY,
+        html
     })
 
 const getWordsFromRequest = (wordsDict) => {
@@ -41,30 +29,42 @@ const getWordsFromRequest = (wordsDict) => {
     return newArray;
 }
 
-const selectWordsFromForm = (wordsArray, text) => {
+// <span style="color: red">Превет</span> как&nbsp;
+const getRightText = (text) => {
+    let newText = '',
+        boolCheck = true;
+    text = text.replace(/&nbsp;/gi, ' ').replace('  ', ' ');
+    //text = text.replace(`<span style="color: red">`, '').replace(`</span>`, '');
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] === '<') boolCheck = false
+        if (text[i-1] === '>') boolCheck = true
+        if (boolCheck) newText += text[i];
+    }
+    return newText
+}
+
+const CreateWordsArray = (notRightWords, text) => {
     return (dispatch) => {
-        text = text.toLowerCase();
         text = text.split(' ');
-        let idElement = -1;
-        for (let i = 0; i < wordsArray.length; i++) {
-            idElement = text.indexOf(wordsArray[i]);
-            if (idElement !== -1) {
-                dispatch(setNotRightWords(idElement));
+        let WordsArray = '';
+        for (let i = 0; i < text.length; i++) {
+            if (notRightWords.includes(text[i])) {
+                WordsArray += `<span style="color: red">${text[i] + '&nbsp;'}</span>`
+            } else {
+                WordsArray += text[i] + '&nbsp;';
             }
         }
+        dispatch(setWordsArray(WordsArray));
     }
 }
 
 export const checkText = (value) => {
     return (dispatch) => {
-        value = value.replace('&nbsp;',' ');
+        value = getRightText(value);
         getCheckWord(value).then(data => {
             let incorrectWords = getWordsFromRequest(data[0]);
-            if (incorrectWords.length !== 0) {
-                dispatch(selectWordsFromForm(incorrectWords, value));
-            }
+            dispatch(CreateWordsArray(incorrectWords, value));
         });
-        dispatch(setText(value));
     }
 }
 
