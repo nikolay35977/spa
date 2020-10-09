@@ -5,7 +5,6 @@ import TextForm from "./TextForm";
 
 let mapStateToProps = (state) => {
     return {
-        text: state.Text.text,
         html: state.Text.html
     }
 }

@@ -29,12 +29,10 @@ const getWordsFromRequest = (wordsDict) => {
     return newArray;
 }
 
-// <span style="color: red">Превет</span> как&nbsp;
 const getRightText = (text) => {
     let newText = '',
         boolCheck = true;
     text = text.replace(/&nbsp;/gi, ' ').replace('  ', ' ');
-    //text = text.replace(`<span style="color: red">`, '').replace(`</span>`, '');
     for (let i = 0; i < text.length; i++) {
         if (text[i] === '<') boolCheck = false
         if (text[i-1] === '>') boolCheck = true
