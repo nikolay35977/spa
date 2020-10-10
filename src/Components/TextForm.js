@@ -8,9 +8,7 @@ const TextForm = (props) => {
     const handleChange = e => {
         let value = e.target.value;
         if (value) {
-            if (value[value.length - 1].charCodeAt() === 59 && value !== props.html) {
-                props.checkText(value);
-            }
+            props.checkText(value);
         }
     };
 

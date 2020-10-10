@@ -32,10 +32,10 @@ const getWordsFromRequest = (wordsDict) => {
 const getRightText = (text) => {
     let newText = '',
         boolCheck = true;
-    text = text.replace(/&nbsp;/gi, ' ').replace('  ', ' ');
+    text = text.replace(/&nbsp;/gi, ' ');
     for (let i = 0; i < text.length; i++) {
         if (text[i] === '<') boolCheck = false
-        if (text[i-1] === '>') boolCheck = true
+        if (text[i - 1] === '>') boolCheck = true
         if (boolCheck) newText += text[i];
     }
     return newText
@@ -44,15 +44,15 @@ const getRightText = (text) => {
 const CreateWordsArray = (notRightWords, text) => {
     return (dispatch) => {
         text = text.split(' ');
-        let WordsArray = '';
+        let WordsArray = [];
         for (let i = 0; i < text.length; i++) {
             if (notRightWords.includes(text[i])) {
-                WordsArray += `<span style="color: red">${text[i] + '&nbsp;'}</span>`
+                WordsArray.push(`<span style="color: red">${text[i]}</span>`);
             } else {
-                WordsArray += text[i] + '&nbsp;';
+                WordsArray.push(text[i]);
             }
         }
-        dispatch(setWordsArray(WordsArray));
+        dispatch(setWordsArray(WordsArray.join('&nbsp;')));
     }
 }
 
