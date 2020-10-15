@@ -5,7 +5,9 @@ import TextForm from "./TextForm";
 
 let mapStateToProps = (state) => {
     return {
-        html: state.Text.html
+        html: state.Text.html,
+        isFetching: state.Text.isFetching,
+        reducerChange: state.Text.reducerChange
     }
 }
 

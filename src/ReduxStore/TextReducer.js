@@ -1,19 +1,39 @@
 ﻿import {getCheckWord} from '../Api/Api';
 
-const SET_WORDS_ARRAY = 'SET-WORDS-ARRAY';
+const SET_WORDS_ARRAY = 'SET-WORDS-ARRAY',
+    IS_FETCHING = 'IS-FETCHING',
+    REDUCER_CHANGE = 'REDUCER-CHANGE';
 
 let initialState = {
-    html: ''
+    html: '',
+    isFetching: false,
+    reducerChange: false
 };
 
 const TextReducer = (state = initialState, action) => {
     switch (action.type) {
         case SET_WORDS_ARRAY:
             return {...state, html: action.html}
+        case IS_FETCHING:
+            return {...state, isFetching: action.isFetching}
+        case REDUCER_CHANGE:
+            return {...state, reducerChange: action.reducerChange}
         default:
             return state
     }
 }
+
+const setReducerChange = (reducerChange) =>
+    ({
+        type: REDUCER_CHANGE,
+        reducerChange
+    })
+
+const setIsFetching = (isFetching) =>
+    ({
+        type: IS_FETCHING,
+        isFetching
+    })
 
 const setWordsArray = (html) =>
     ({
@@ -21,48 +41,46 @@ const setWordsArray = (html) =>
         html
     })
 
+
 const getWordsFromRequest = (wordsDict) => {
-    let newArray = [];
+    let newArray = new Map();
     for (let i = 0; i < wordsDict.length; i++) {
-        newArray.push(wordsDict[i]['word']);
+        newArray.set(wordsDict[i]['pos'], wordsDict[i]['word']);
     }
     return newArray;
 }
 
 const getRightText = (text) => {
-    let newText = '',
-        boolCheck = true;
-    text = text.replace(/&nbsp;/gi, ' ');
-    for (let i = 0; i < text.length; i++) {
-        if (text[i] === '<') boolCheck = false
-        if (text[i - 1] === '>') boolCheck = true
-        if (boolCheck) newText += text[i];
-    }
-    return newText
+    text = text.split(`<span style="color: red">`).join('').split(`</span>`).join('').split('</p>').join('').split('<p>').join('');
+    return text
 }
 
-const CreateWordsArray = (notRightWords, text) => {
+const CreateWordsArray = (notRightWords, text, reducerChange) => {
     return (dispatch) => {
-        text = text.split(' ');
-        let WordsArray = [];
-        for (let i = 0; i < text.length; i++) {
-            if (notRightWords.includes(text[i])) {
-                WordsArray.push(`<span style="color: red">${text[i]}</span>`);
-            } else {
-                WordsArray.push(text[i]);
-            }
+        dispatch(setIsFetching(true));
+        console.log(notRightWords);
+        for (let [key, value] of notRightWords) {
+            text = text.replace(value ,(value ) =>`<span style="color: red">${value}</span>`);
         }
-        dispatch(setWordsArray(WordsArray.join('&nbsp;')));
+        if (!reducerChange) dispatch(setWordsArray('<p>' + text + '</p>'));
+        dispatch(setIsFetching(false));
     }
 }
 
-export const checkText = (value) => {
+
+export const checkText = (value, isFetching, reducerChange) => {
     return (dispatch) => {
-        value = getRightText(value);
-        getCheckWord(value).then(data => {
-            let incorrectWords = getWordsFromRequest(data[0]);
-            dispatch(CreateWordsArray(incorrectWords, value));
-        });
+        if (isFetching) {
+            dispatch(setWordsArray('<p>' + value + '</p>'));
+            dispatch(setReducerChange(true));
+        } else {
+            dispatch(setReducerChange(false));
+            value = getRightText(value);
+            getCheckWord(value.replace(/&nbsp;/gi, ' ')).then(data => {
+                let incorrectWords = getWordsFromRequest(data[0]);
+                dispatch(CreateWordsArray(incorrectWords, value, reducerChange));
+            });
+        }
     }
 }
 
